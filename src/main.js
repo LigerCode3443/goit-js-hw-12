@@ -11,7 +11,6 @@ import { getPhotos } from './js/pixaday-api.js';
 import { createMarkup } from './js/render-fuctions.js';
 // icon
 // import exit from './img/error.svg';
-//hello
 
 const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
