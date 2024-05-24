@@ -21,9 +21,6 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
-.iziToast button.iziToast-close {
-  background: url('../img/exit.svg') no-repeat 50% 50%;
-}
 
 body {
   width: 1200px;
@@ -76,6 +73,26 @@ body {
 
 .btn-submit:hover,
 .btn-submit:focus {
+  background: #6c8cff;
+}
+.btn-load {
+  display: block;
+  margin: 0 auto;
+  margin-top: 25px;
+  border-radius: 8px;
+  border: transparent;
+  padding: 8px 16px;
+  width: 125px;
+  height: 40px;
+  background: #4e75ff;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+  color: #fff;
+}
+.btn-load:hover,
+.btn-load:focus {
   background: #6c8cff;
 }
 
@@ -137,6 +154,13 @@ body {
   top: 0;
   left: 0;
   background-color: rgba(0, 0, 0, 0.5);
+}
+.box {
+  display: block;
+  margin: 0 auto;
+  width: 100px;
+  height: 100px;
+  background-color: red;
 }
 /* spinner */
 

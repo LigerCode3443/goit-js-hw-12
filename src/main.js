@@ -9,8 +9,8 @@ import 'izitoast/dist/css/iziToast.min.css';
 // Pixaday
 import { getPhotos } from './js/pixaday-api.js';
 import { createMarkup } from './js/render-fuctions.js';
-// icon
-// import exit from './img/error.svg';
+// axios
+import axios from 'axios';
 
 const lightbox = new SimpleLightbox('.gallery a', {
   captionDelay: 250,
@@ -19,6 +19,8 @@ const lightbox = new SimpleLightbox('.gallery a', {
 const formEl = document.querySelector('.form-input');
 const ulEl = document.querySelector('.js-gallery');
 const target = document.querySelector('.js-backdrop');
+const loadBtn = document.querySelector('.js-load');
+// const scrollEl = document.querySelector('.js-box');
 const opts = {
   lines: 11, // The number of lines to draw
   length: 0, // The length of each line
@@ -40,46 +42,85 @@ const opts = {
   position: 'absolute', // Element positioning
 };
 const spinner = new Spinner(opts);
+let page = 1;
+let query = null;
+const limit = 15;
 
-formEl.addEventListener('submit', e => {
+formEl.addEventListener('submit', async e => {
   e.preventDefault();
   ulEl.innerHTML = '';
+  page = 1;
 
   spinner.spin(target);
   target.classList.remove('is-hidden');
-  const query = e.currentTarget.elements.query.value.trim();
-  getPhotos(query)
-    .then(res => {
-      if (res.hits.length === 0) {
-        iziToast.error({
-          //   iconUrl: exit,
-          title: 'ERROR',
-          message:
-            'Sorry, there are no images matching your search query. Please try again!',
-        });
-      }
-      ulEl.innerHTML = createMarkup(res.hits);
-      lightbox.refresh();
-    })
-    .catch(error => {
-      iziToast.error({
-        title: 'ERROR',
-        message: res.status,
-      });
-    })
-    .finally(() => {
-      spinner.stop();
-      target.classList.add('is-hidden');
-      e.target.reset();
+  query = e.currentTarget.elements.query.value.trim();
+
+  try {
+    const response = await getPhotos(query, page);
+
+    iziToast.show({
+      title: `${response.data.total}`,
+      message: 'Pictures',
     });
+    if (response.data.totalHits === 0) {
+      loadBtn.classList.add('is-hidden');
+      iziToast.error({
+        //   iconUrl: exit,
+        title: 'ERROR',
+        message:
+          'Sorry, there are no images matching your search query. Please try again!',
+      });
+    }
+    ulEl.innerHTML = createMarkup(response.data.hits);
+    response.data.totalHits < limit
+      ? loadBtn.classList.add('is-hidden')
+      : loadBtn.classList.remove('is-hidden');
+
+    lightbox.refresh();
+  } catch (error) {
+    iziToast.error({
+      title: 'ERROR',
+    });
+  } finally {
+    spinner.stop();
+    target.classList.add('is-hidden');
+    e.target.reset();
+  }
+});
+loadBtn.addEventListener('click', async e => {
+  page += 1;
+  spinner.spin(target);
+  target.classList.remove('is-hidden');
+
+  try {
+    const response = await getPhotos(query, page);
+    ulEl.insertAdjacentHTML('beforeend', createMarkup(response.data.hits));
+    const lastPage = Math.ceil(response.data.totalHits / limit);
+    if (lastPage === page) {
+      loadBtn.classList.add('is-hidden');
+      iziToast.show({
+        message: 'Last page',
+      });
+    }
+    lightbox.refresh();
+  } catch (error) {
+    iziToast.error({
+      title: 'ERROR',
+    });
+  } finally {
+    spinner.stop();
+    scroolBy();
+    target.classList.add('is-hidden');
+  }
 });
 
-// comments: 14;
-// downloads: 12055;
+// !============
+function scroolBy() {
+  const liEl = ulEl.firstElementChild;
+  const height = liEl.getBoundingClientRect().height;
 
-// largeImageURL: 'https://pixabay.com/get/g18176df01580116c952c79668f7c512c93e9658df1ea2e1cc83088e45212c8f365a2a83854d2a4da0737f6a92ca9d13ff1d9cf1ffb038b382dd3176c058a48af_1280.jpg';
-// likes: 89;
-//img.webformatURL
-// tags: 'labrador, dog, animal';
-
-// views: 14789;
+  window.scrollBy({
+    top: height * 3,
+    behavior: 'smooth',
+  });
+}

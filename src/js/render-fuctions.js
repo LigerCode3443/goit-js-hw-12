@@ -1,5 +1,4 @@
 export function createMarkup(arr) {
-  console.log(arr);
   return arr
     .map(img => {
       return `
